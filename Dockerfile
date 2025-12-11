@@ -1,4 +1,5 @@
 FROM node:18-alpine
+
 WORKDIR /app
 
 COPY ./strapi-task1/package*.json ./
