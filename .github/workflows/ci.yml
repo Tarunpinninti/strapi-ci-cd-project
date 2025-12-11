@@ -12,6 +12,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
       - name: Log in to DockerHub
         uses: docker/login-action@v3
         with:
@@ -20,7 +23,8 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker buildx build --platform linux/amd64 -t ${{ secrets.DOCKER_USERNAME }}/strapi:${{ github.sha }} --load .
+          docker buildx build --platform linux/amd64 --load \
+          -t ${{ secrets.DOCKER_USERNAME }}/strapi:${{ github.sha }} .
 
       - name: Push Image
         run: |
