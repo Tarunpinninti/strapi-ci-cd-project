@@ -1,6 +1,4 @@
-# CI Pipeline refreshed
 name: CI - Build & Push Docker Image
-
 
 on:
   push:
@@ -20,9 +18,9 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build Docker Image (Strapi project inside strapi-task1/)
+      - name: Build Docker Image (root project)
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/strapi:${{ github.sha }} ./strapi-task1
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/strapi:${{ github.sha }} .
 
       - name: Push Image
         run: |
