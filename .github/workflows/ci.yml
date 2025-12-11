@@ -20,7 +20,8 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/strapi:${{ github.sha }} .
+          docker buildx build --platform linux/amd64 -t ${{ secrets.DOCKER_USERNAME }}/strapi:${{ github.sha }} --load .
+
 
       - name: Push Image
         run: |
