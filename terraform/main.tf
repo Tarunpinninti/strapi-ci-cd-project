@@ -1,21 +1,84 @@
-provider "aws" {
-  region = "us-east-1"
+#########################################
+# SECURITY GROUP
+#########################################
+
+resource "aws_security_group" "strapi_sg" {
+  name        = "strapi-security-group"
+  description = "Allow Strapi (1337) and SSH (22)"
+
+  ingress {
+    description = "Allow Strapi port"
+    from_port   = 1337
+    to_port     = 1337
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "Allow SSH"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 }
 
-resource "aws_instance" "strapi" {
-  ami           = "ami-0c02fb55956c7d316"
-  instance_type = "t2.micro"
-  key_name      = var.key_pair
+#########################################
+# EC2 INSTANCE
+#########################################
 
-  user_data = <<EOF
-#!/bin/bash
-yum update -y
-amazon-linux-extras install docker -y
-service docker start
-docker run -d -p 1337:1337 ${var.docker_image}
-EOF
+resource "aws_instance" "strapi_server" {
+  ami           = "ami-08a52ddb321b32a8c"
+  instance_type = var.instance_type
+
+  # FIXED: Correct variable name for key pair
+  key_name = var.key_name
+
+  # Attach security group
+  vpc_security_group_ids = [aws_security_group.strapi_sg.id]
+
+  user_data = <<-EOF
+    #!/bin/bash
+    apt update -y
+    apt install -y docker.io
+    systemctl start docker
+    systemctl enable docker
+
+    # Pull latest Strapi image
+    docker pull ${var.docker_image}
+
+    # Stop old container if exists
+    docker stop strapi || true
+    docker rm strapi || true
+
+    # Run new container
+    docker run -d \
+      --name strapi \
+      -p 1337:1337 \
+      ${var.docker_image}
+  EOF
+
+  tags = {
+    Name = "Strapi-EC2-Server"
+  }
 }
+
+#########################################
+# OUTPUTS
+#########################################
 
 output "public_ip" {
-  value = aws_instance.strapi.public_ip
+  value = aws_instance.strapi_server.public_ip
 }
+
+output "strapi_public_ip" {
+  value = aws_instance.strapi_server.public_ip
+}
+

@@ -1,1 +1,4 @@
-node_modules/
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/*.tfstate*
+terraform/strapi-key.pem
