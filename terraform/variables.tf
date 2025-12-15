@@ -3,10 +3,16 @@ variable "docker_image" {
   type        = string
 }
 
-variable "key_pair" {
+variable "key_name" {
   description = "EC2 key pair name"
   type        = string
   default     = "strapi-key"
+}
+
+variable "instance_type" {
+  description = "EC2 instance type"
+  type        = string
+  default     = "t3.micro"
 }
 
 variable "aws_region" {
@@ -14,4 +20,3 @@ variable "aws_region" {
   type        = string
   default     = "us-east-1"
 }
-
