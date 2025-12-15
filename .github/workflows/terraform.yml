@@ -30,8 +30,10 @@ jobs:
 
       - name: Terraform Plan
         working-directory: terraform
-        run: terraform plan -var="docker_image=tarunpinninti/strapi:latest"
+        run: terraform plan \
+          -var="docker_image=tarunpinninti/strapi:latest"
 
       - name: Terraform Apply
         working-directory: terraform
-        run: terraform apply -auto-approve -var="docker_image=tarunpinninti/strapi:latest"
+        run: terraform apply -auto-approve \
+          -var="docker_image=tarunpinninti/strapi:latest"
