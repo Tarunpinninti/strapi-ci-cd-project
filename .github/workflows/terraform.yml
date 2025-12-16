@@ -2,6 +2,9 @@ name: Deploy Strapi to EC2
 
 on:
   workflow_dispatch:
+permissions:
+  contents: read
+  id-token: write
 
 jobs:
   terraform:
