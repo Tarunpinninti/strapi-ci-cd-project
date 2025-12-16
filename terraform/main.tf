@@ -20,25 +20,28 @@ resource "aws_instance" "strapi_server" {
   ]
 
   user_data = <<-EOF
-    #!/bin/bash
-    dnf update -y
-    dnf install -y docker
+  #!/bin/bash
+  dnf update -y
+  dnf install -y docker
 
-    systemctl start docker
-    systemctl enable docker
+  systemctl start docker
+  systemctl enable docker
 
-    usermod -aG docker ec2-user
+  usermod -aG docker ec2-user
 
-    docker pull ${var.docker_image}
+  docker pull ${var.docker_image}
 
-    docker stop strapi || true
-    docker rm strapi || true
+  docker stop strapi || true
+  docker rm strapi || true
 
-    docker run -d \
-      --name strapi \
-      -p 1337:1337 \
-      ${var.docker_image}
-  EOF
+  docker run -d \
+    --name strapi \
+    -p 1337:1337 \
+    -e HOST=0.0.0.0 \
+    -e PORT=1337 \
+    ${var.docker_image}
+EOF
+
 
   tags = {
     Name = "Strapi-EC2-Server"
