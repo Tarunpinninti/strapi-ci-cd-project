@@ -2,16 +2,17 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+ENV NODE_OPTIONS="--max-old-space-size=2048"
+
+RUN apk add --no-cache python3 make g++
+
 COPY package*.json ./
-
-# Strapi v5 requires Python + build tools for better-sqlite3
-RUN apk add --no-cache python3 make g++ 
-
 RUN npm install
 
 COPY . .
 
-RUN npm run build
+# FIX: use npx instead of direct strapi
+RUN npx strapi build
 
 EXPOSE 1337
 
