@@ -2,6 +2,7 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+ENV NODE_ENV=production
 ENV NODE_OPTIONS="--max-old-space-size=2048"
 
 RUN apk add --no-cache python3 make g++
@@ -11,11 +12,11 @@ RUN npm install
 
 COPY . .
 
-# FIX: use npx instead of direct strapi
-RUN npx strapi build
+# FIX: run Strapi build via node (no permission issue)
+RUN node node_modules/@strapi/strapi/bin/strapi.js build
 
 EXPOSE 1337
 
-CMD ["npm", "start"]
+CMD ["node", "node_modules/@strapi/strapi/bin/strapi.js", "start"]
 
 
