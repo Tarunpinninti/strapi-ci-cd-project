@@ -3,11 +3,11 @@
 #########################################
 
 resource "aws_security_group" "strapi_sg" {
-  name_prefix = "strapi-sg-"
+  name        = "strapi-security-group"
   description = "Allow Strapi (1337) and SSH (22)"
 
   ingress {
-    description = "Allow Strapi port"
+    description = "Allow Strapi"
     from_port   = 1337
     to_port     = 1337
     protocol    = "tcp"
@@ -35,31 +35,30 @@ resource "aws_security_group" "strapi_sg" {
 #########################################
 
 resource "aws_instance" "strapi_server" {
-  ami           = "ami-08a52ddb321b32a8c"
+  ami           = "ami-08a52ddb321b32a8c" # Amazon Linux 2023
   instance_type = var.instance_type
   key_name      = var.key_name
 
   vpc_security_group_ids = [aws_security_group.strapi_sg.id]
 
   user_data = <<-EOF
-              #!/bin/bash
-              apt update -y
-              apt install -y docker.io
-              systemctl start docker
-              systemctl enable docker
+    #!/bin/bash
+    dnf update -y
+    dnf install -y docker
+    systemctl start docker
+    systemctl enable docker
+    usermod -aG docker ec2-user
 
-              docker pull ${var.docker_image}
+    docker pull ${var.docker_image}
 
-              docker stop strapi || true
-              docker rm strapi || true
+    docker stop strapi || true
+    docker rm strapi || true
 
-              docker run -d \
-                --name strapi \
-                -p 1337:1337 \
-                ${var.docker_image}
-              EOF
-
-  depends_on = [aws_security_group.strapi_sg]
+    docker run -d \
+      --name strapi \
+      -p 1337:1337 \
+      ${var.docker_image}
+  EOF
 
   tags = {
     Name = "Strapi-EC2-Server"
@@ -70,10 +69,7 @@ resource "aws_instance" "strapi_server" {
 # OUTPUTS
 #########################################
 
-output "public_ip" {
-  value = aws_instance.strapi_server.public_ip
+output "strapi_url" {
+  value = "http://${aws_instance.strapi_server.public_ip}:1337"
 }
 
-output "strapi_public_ip" {
-  value = aws_instance.strapi_server.public_ip
-}
