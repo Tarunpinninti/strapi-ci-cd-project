@@ -2,9 +2,6 @@ name: Deploy Strapi to EC2
 
 on:
   workflow_dispatch:
-permissions:
-  contents: read
-  id-token: write
 
 jobs:
   terraform:
@@ -33,15 +30,14 @@ jobs:
 
       - name: Terraform Plan
         working-directory: terraform
-        run: terraform plan \
-          -var="aws_region=us-east-1" \
-          -var="docker_image=tarunpinninti/strapi:latest" \
-          -var="key_name=strapi-key"
+        run: |
+          terraform plan \
+            -var="docker_image=tarunpinninti/strapi:latest" \
+            -var="key_name=strapi-key"
 
       - name: Terraform Apply
         working-directory: terraform
-        run: terraform apply -auto-approve \
-          -var="aws_region=us-east-1" \
-          -var="docker_image=tarunpinninti/strapi:latest" \
-          -var="key_name=strapi-key"
-
+        run: |
+          terraform apply -auto-approve \
+            -var="docker_image=tarunpinninti/strapi:latest" \
+            -var="key_name=strapi-key"
