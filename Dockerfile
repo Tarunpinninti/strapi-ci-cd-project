@@ -1,24 +1,25 @@
 
-FROM node:20-alpine
+FROM node:20-bookworm-slim
 
 WORKDIR /app
 
-# Required for native modules like better-sqlite3
-RUN apk add --no-cache python3 make g++
+ENV NODE_ENV=production
+ENV NODE_OPTIONS="--max-old-space-size=2048"
 
-# Copy only package files first (for better caching)
-COPY package.json package-lock.json* ./
+# Install dependencies required for native modules
+RUN apt-get update && apt-get install -y \
+    python3 \
+    make \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install dependencies INSIDE container
+COPY package*.json ./
 RUN npm install
 
-# Copy rest of the application
 COPY . .
 
-# Build Strapi admin panel
-RUN node node_modules/@strapi/strapi/bin/strapi.js build
+RUN node ./node_modules/@strapi/strapi/bin/strapi.js build
 
 EXPOSE 1337
 
-# Start Strapi
 CMD ["node", "node_modules/@strapi/strapi/bin/strapi.js", "start"]
