@@ -1,5 +1,5 @@
 #########################################
-# DATA: EXISTING SECURITY GROUP
+# EXISTING SECURITY GROUP
 #########################################
 
 data "aws_security_group" "strapi_sg" {
@@ -21,18 +21,13 @@ resource "aws_instance" "strapi_server" {
 
   user_data = <<-EOF
     #!/bin/bash
-    set -e
-
     dnf update -y
     dnf install -y docker
 
-    systemctl enable docker
     systemctl start docker
+    systemctl enable docker
 
     usermod -aG docker ec2-user
-
-    # Login to Docker Hub
-    echo "${var.dockerhub_password}" | docker login -u "${var.dockerhub_username}" --password-stdin
 
     docker pull ${var.docker_image}
 
