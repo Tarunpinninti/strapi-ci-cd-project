@@ -26,16 +26,15 @@ resource "aws_instance" "strapi_server" {
     dnf update -y
     dnf install -y docker
 
-    systemctl start docker
     systemctl enable docker
+    systemctl start docker
 
     usermod -aG docker ec2-user
 
-    # Wait for Docker
-    sleep 10
+    # Login to Docker Hub
+    echo "${var.dockerhub_password}" | docker login -u "${var.dockerhub_username}" --password-stdin
 
-    # Pull PUBLIC image
-    docker pull tarunpinninti/strapi:9668afc82bc284e53db422c0ac017dcf859e4a2b
+    docker pull ${var.docker_image}
 
     docker stop strapi || true
     docker rm strapi || true
@@ -43,8 +42,7 @@ resource "aws_instance" "strapi_server" {
     docker run -d \
       --name strapi \
       -p 1337:1337 \
-      -e HOST=0.0.0.0 \
-      tarunpinninti/strapi:9668afc82bc284e53db422c0ac017dcf859e4a2b
+      ${var.docker_image}
   EOF
 
   tags = {
