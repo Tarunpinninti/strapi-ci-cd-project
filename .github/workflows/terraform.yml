@@ -31,4 +31,5 @@ jobs:
           terraform apply -auto-approve \
             -var="docker_image=tarunpinninti/strapi:${{ github.sha }}" \
             -var="key_name=strapi-key" \
-            -var="aws_region=us-east-1"
+            -var="dockerhub_username=${{ secrets.DOCKERHUB_USERNAME }}" \
+            -var="dockerhub_password=${{ secrets.DOCKERHUB_PASSWORD }}"
