@@ -1,30 +1,24 @@
 
-FROM node:20-bullseye
+FROM node:20-alpine
 
 WORKDIR /app
 
-ENV NODE_ENV=production
-ENV NODE_OPTIONS="--max-old-space-size=2048"
+# Required for native modules like better-sqlite3
+RUN apk add --no-cache python3 make g++
 
-# Install dependencies required for native modules
-RUN apt-get update && apt-get install -y \
-    python3 \
-    make \
-    g++ \
-    && rm -rf /var/lib/apt/lists/*
+# Copy only package files first (for better caching)
+COPY package.json package-lock.json* ./
 
-# Copy package files first (better cache)
-COPY package*.json ./
-
-# Install dependencies inside container (IMPORTANT)
+# Install dependencies INSIDE container
 RUN npm install
 
-# Copy rest of the app
+# Copy rest of the application
 COPY . .
 
-# Build Strapi admin
+# Build Strapi admin panel
 RUN node node_modules/@strapi/strapi/bin/strapi.js build
 
 EXPOSE 1337
 
+# Start Strapi
 CMD ["node", "node_modules/@strapi/strapi/bin/strapi.js", "start"]
