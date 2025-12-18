@@ -3,18 +3,17 @@ FROM node:20-alpine
 WORKDIR /app
 
 ENV NODE_ENV=production
-ENV NODE_OPTIONS="--max-old-space-size=2048"
 
-# Required for native modules (better-sqlite3)
-RUN apk add --no-cache python3 make g++
+# System deps for native modules
+RUN apk add --no-cache python3 make g++ libc6-compat
 
-# Copy only package files first
+# Copy only package files first (cache friendly)
 COPY package*.json ./
 
-# Install dependencies INSIDE container (Linux build)
-RUN npm install --production
+# Install deps INSIDE container (important)
+RUN npm install --omit=dev
 
-# Copy application code (without node_modules)
+# Copy rest of the app
 COPY . .
 
 # Build Strapi admin

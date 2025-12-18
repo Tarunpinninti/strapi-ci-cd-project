@@ -1,5 +1,5 @@
 #########################################
-# EXISTING SECURITY GROUP
+# DATA SOURCE: EXISTING SECURITY GROUP
 #########################################
 
 data "aws_security_group" "strapi_sg" {
@@ -37,6 +37,10 @@ resource "aws_instance" "strapi_server" {
     docker run -d \
       --name strapi \
       -p 1337:1337 \
+      -e NODE_ENV=production \
+      -e ADMIN_JWT_SECRET=$(openssl rand -hex 32) \
+      -e JWT_SECRET=$(openssl rand -hex 32) \
+      -e APP_KEYS=$(openssl rand -hex 32),$(openssl rand -hex 32) \
       ${var.docker_image}
   EOF
 
